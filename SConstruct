@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 import os, sys
-from SCons.Script import ARGUMENTS
-from SCons.Script import Glob
+from SCons.Script import Glob, ARGUMENTS
 
 # For reference:
 # - CCFLAGS are compilation flags shared between C and C++
@@ -13,16 +12,34 @@ from SCons.Script import Glob
 # - CPPDEFINES are for pre-processor defines
 # - LINKFLAGS are for linking flags
 
-# This is done because Gemini code assist insists on running scons without passing parameters explicitly.
-# Provide sensible defaults so running `scons` without arguments produces a debug build with symbols enabled.
-# Only set these when the caller did not explicitly specify them on the command line (via ARGUMENTS or -Q).
-# This preserves explicit overrides like `scons optimize=release`.
-from SCons.Script import ARGUMENTS
-if "debug_symbols" not in ARGUMENTS:
-    ARGUMENTS["debug_symbols"] = "yes"
-if "optimize" not in ARGUMENTS:
-    ARGUMENTS["optimize"] = "debug"
 env = SConscript("godot-cpp/SConstruct")
+
+# Apply macOS-specific build arguments automatically
+if env["platform"] == "macos":
+    if sys.platform == "darwin":
+        if "arch" not in ARGUMENTS: ARGUMENTS["arch"] = "x86_64"
+        if "use_llvm" not in ARGUMENTS: ARGUMENTS["use_llvm"] = "no"
+        if "CC" not in ARGUMENTS:
+            ARGUMENTS["CC"] = "gcc-15"
+            env["CC"] = "gcc-15"
+        if "CXX" not in ARGUMENTS:
+            ARGUMENTS["CXX"] = "g++-15"
+            env["CXX"] = "g++-15"
+
+    # GCC on macOS does not support -arch flags, which godot-cpp adds by default.
+    if "gcc" in os.path.basename(str(env["CC"])):
+        for var in ["CCFLAGS", "LINKFLAGS"]:
+            new_flags = []
+            skip = False
+            for flag in env[var]:
+                if skip:
+                    skip = False
+                    continue
+                if flag == "-arch":
+                    skip = True
+                    continue
+                new_flags.append(flag)
+            env[var] = new_flags
 
 def find_source_files(base_dir):
     """
