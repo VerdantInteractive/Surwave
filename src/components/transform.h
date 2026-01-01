@@ -35,24 +35,24 @@ struct Scale3D {
 
 inline FlecsRegistry register_transform_components([](flecs::world& world) {
 
-    world.component<Position2D>("Position2D")
+    world.component<Position2D>()
         .member<godot::Vector2>("value");
 
-    world.component<Position3D>("Position3D")
+    world.component<Position3D>()
         .member<godot::Vector3>("value");
 
 
-    world.component<Rotation2D>("Rotation2D")
+    world.component<Rotation2D>()
         .member<godot::real_t>("value");
 
-    world.component<Rotation3D>("Rotation3D")
+    world.component<Rotation3D>()
         .member<godot::Vector3>("value");
 
 
-    world.component<Scale2D>("Scale2D")
+    world.component<Scale2D>()
         .member<godot::Vector2>("value");
 
-    world.component<Scale3D>("Scale3D")
+    world.component<Scale3D>()
         .member<godot::Vector3>("value");
 
 });

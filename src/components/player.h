@@ -21,10 +21,10 @@ struct PlayerDamageCooldown {
 };
 
 inline FlecsRegistry register_player_components([](flecs::world& world) {
-    world.component<PlayerPosition>("PlayerPosition")
+    world.component<PlayerPosition>()
         .add(flecs::Singleton);
 
-    world.component<PlayerDamageCooldown>("PlayerDamageCooldown")
+    world.component<PlayerDamageCooldown>()
         .member<godot::real_t>("value")
         .add(flecs::Singleton)
         .set<PlayerDamageCooldown>({ godot::real_t(0.0) });

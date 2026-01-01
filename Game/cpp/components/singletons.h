@@ -65,7 +65,7 @@ struct EnemyCount
 
 
 inline FlecsRegistry register_game_singleton_components([](flecs::world& world) {
-    world.component<EnemyBoidMovementSettings>("EnemyBoidMovementSettings")
+    world.component<EnemyBoidMovementSettings>()
         .member<godot::real_t>("player_attraction_weight")
         .member<godot::real_t>("player_engage_distance")
         .member<godot::real_t>("neighbor_radius")
@@ -94,7 +94,7 @@ inline FlecsRegistry register_game_singleton_components([](flecs::world& world) 
             godot::real_t(0.05)   // separation_noise_intensity
             });
 
-    world.component<EnemyAnimationSettings>("EnemyAnimationSettings")
+    world.component<EnemyAnimationSettings>()
         .member<godot::real_t>("animation_interval")
         .member<godot::real_t>("walk_animation_range")
         .member<godot::real_t>("death_animation_frame_count")
@@ -117,7 +117,7 @@ inline FlecsRegistry register_game_singleton_components([](flecs::world& world) 
             godot::real_t(0.1) // hit_reaction_duration
             });
 
-    world.component<EnemyTakeDamageSettings>("EnemyTakeDamageSettings")
+    world.component<EnemyTakeDamageSettings>()
         .member<godot::real_t>("projectile_hit_cooldown")
         .member<godot::real_t>("shockwave_hit_cooldown")
         .member<godot::real_t>("projectile_damage")
@@ -130,21 +130,21 @@ inline FlecsRegistry register_game_singleton_components([](flecs::world& world) 
             godot::real_t(1.0)  // shockwave_damage
             });
 
-    world.component<PlayerTakeDamageSettings>("PlayerTakeDamageSettings")
+    world.component<PlayerTakeDamageSettings>()
         .member<godot::real_t>("damage_cooldown")
         .member<godot::real_t>("player_hit_radius")
         .add(flecs::Singleton)
         .set<PlayerTakeDamageSettings>({ godot::real_t(0.3), godot::real_t(9.0) });
 
-    world.component<EnemyCount>("EnemyCount")
+    world.component<EnemyCount>()
         .member<size_t>("value")
         .add(flecs::Singleton)
         .set<EnemyCount>({ 0 });
 
-    world.component<ProjectileData>("ProjectileData")
+    world.component<ProjectileData>()
         .add(flecs::Singleton);
 
-    world.component<ShockwaveData>("ShockwaveData")
+    world.component<ShockwaveData>()
         .add(flecs::Singleton);
 
     register_singleton_setter<godot::Dictionary>("EnemyTakeDamageSettings", [](flecs::world& world, const godot::Dictionary& damage_settings) {

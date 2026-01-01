@@ -36,8 +36,7 @@ inline FlecsRegistry register_enemy_death_system([](flecs::world& world) {
             flecs::field<MovementSpeed> movement_speed = it.field<MovementSpeed>(4);
             flecs::field<Velocity2D> velocities = it.field<Velocity2D>(5);
 
-            const std::size_t entity_count = it.count();
-            for (std::size_t entity_index = 0; entity_index < entity_count; ++entity_index) {
+            for (auto entity_index : it) {
                 if (hit_points[entity_index].value > godot::real_t(0.0)) { continue; }
 
                 flecs::entity entity = it.entity(static_cast<std::int32_t>(entity_index));

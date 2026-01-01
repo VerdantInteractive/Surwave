@@ -23,74 +23,74 @@
 
 inline FlecsRegistry register_godot_variant_components([](flecs::world& world)
 {
-    world.component<godot::Color>("Color") // 16 bytes
+    world.component<godot::Color>() // 16 bytes
         .member<godot::real_t>("r")
         .member<godot::real_t>("g")
         .member<godot::real_t>("b")
         .member<godot::real_t>("a");
 
-    world.component<godot::Vector2>("Vector2") // 8 bytes
+    world.component<godot::Vector2>() // 8 bytes
         .member<godot::real_t>("x")
         .member<godot::real_t>("y");
 
-    world.component<godot::Vector2i>("Vector2i") // 8 bytes
+    world.component<godot::Vector2i>() // 8 bytes
         .member<int32_t>("x")
         .member<int32_t>("y");
 
-    world.component<godot::Vector3>("Vector3") // 12 bytes
+    world.component<godot::Vector3>() // 12 bytes
         .member<godot::real_t>("x")
         .member<godot::real_t>("y")
         .member<godot::real_t>("z");
 
-    world.component<godot::Vector3i>("Vector3i") // 12 bytes
+    world.component<godot::Vector3i>() // 12 bytes
         .member<int32_t>("x")
         .member<int32_t>("y")
         .member<int32_t>("z");
 
-    world.component<godot::Vector4>("Vector4") // 16 bytes
+    world.component<godot::Vector4>() // 16 bytes
         .member<godot::real_t>("x")
         .member<godot::real_t>("y")
         .member<godot::real_t>("z")
         .member<godot::real_t>("w");
 
-    world.component<godot::Vector4i>("Vector4i") // 16 bytes
+    world.component<godot::Vector4i>() // 16 bytes
         .member<int32_t>("x")
         .member<int32_t>("y")
         .member<int32_t>("z")
         .member<int32_t>("w");
 
-    world.component<godot::Rect2>("Rect2") // 16 bytes
+    world.component<godot::Rect2>() // 16 bytes
         .member<godot::Vector2>("position")
         .member<godot::Vector2>("size");
 
-    world.component<godot::Rect2i>("Rect2i") // 16 bytes
+    world.component<godot::Rect2i>() // 16 bytes
         .member<godot::Vector2i>("position")
         .member<godot::Vector2i>("size");
 
-    world.component<godot::Plane>("Plane") // 16 bytes
+    world.component<godot::Plane>() // 16 bytes
         .member<godot::Vector3>("normal")
         .member<godot::real_t>("d");
 
-    world.component<godot::Quaternion>("Quaternion") // 16 bytes
+    world.component<godot::Quaternion>() // 16 bytes
         .member<godot::real_t>("x")
         .member<godot::real_t>("y")
         .member<godot::real_t>("z")
         .member<godot::real_t>("w");
 
-    world.component<godot::Basis>("Basis") // 36 bytes - acceptable
+    world.component<godot::Basis>() // 36 bytes - acceptable
         .member<godot::Vector3>("rows", 3);
 
-    world.component<godot::Transform2D>("Transform2D") // 24 bytes
+    world.component<godot::Transform2D>() // 24 bytes
         .member<godot::Vector2>("columns", 3);
 
-    world.component<godot::Transform3D>("Transform3D") // 48 bytes - borderline large, but acceptable for transform components
+    world.component<godot::Transform3D>() // 48 bytes - borderline large, but acceptable for transform components
         .member<godot::Basis>("basis")
         .member<godot::Vector3>("origin");
 
-    world.component<godot::AABB>("AABB") // 24 bytes
+    world.component<godot::AABB>() // 24 bytes
         .member<godot::Vector3>("position")
         .member<godot::Vector3>("size");
 
-    world.component<godot::Projection>("Projection") // 64 bytes - large, use sparingly
+    world.component<godot::Projection>() // 64 bytes - large, use sparingly
         .member<godot::Vector4>("columns", 4);
 });

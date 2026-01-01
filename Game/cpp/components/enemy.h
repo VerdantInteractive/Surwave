@@ -52,40 +52,38 @@ struct ShockwaveHitTimeout {
     godot::real_t value;
 };
 
-// struct IsDying {};
-
 
 inline FlecsRegistry register_enemy_stats_components([](flecs::world& world) {
-    world.component<HitPoints>("HitPoints")
+    world.component<HitPoints>()
         .member<godot::real_t>("value");
 
-    world.component<HitRadius>("HitRadius")
+    world.component<HitRadius>()
         .member<godot::real_t>("value");
 
-    world.component<MeleeDamage>("MeleeDamage")
+    world.component<MeleeDamage>()
         .member<godot::real_t>("value");
 
-    world.component<MovementSpeed>("MovementSpeed")
+    world.component<MovementSpeed>()
         .member<godot::real_t>("value");
 
-    world.component<AnimationFrameOffset>("AnimationFrameOffset")
+    world.component<AnimationFrameOffset>()
         .member<godot::real_t>("value");
 
-    world.component<DeathTimer>("DeathTimer")
+    world.component<DeathTimer>()
         .member<godot::real_t>("value");
 
-    world.component<HitReactionTimer>("HitReactionTimer")
+    world.component<HitReactionTimer>()
         .member<godot::real_t>("value");
 
-    world.component<HFlipTimer>("HFlipTimer")
+    world.component<HFlipTimer>()
         .member<godot::real_t>("value");
 
-    world.component<VFlipTimer>("VFlipTimer")
+    world.component<VFlipTimer>()
         .member<godot::real_t>("value");
 
-    world.component<ProjectileHitTimeout>("ProjectileHitTimeout")
+    world.component<ProjectileHitTimeout>()
         .member<godot::real_t>("value");
 
-    world.component<ShockwaveHitTimeout>("ShockwaveHitTimeout")
+    world.component<ShockwaveHitTimeout>()
         .member<godot::real_t>("value");
 });

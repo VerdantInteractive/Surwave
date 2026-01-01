@@ -13,13 +13,13 @@ inline FlecsRegistry register_enemy_count_update_system([](flecs::world& world) 
     world.system<>("Enemy Count Update")
         .kind(flecs::PostUpdate)
         .run([enemy_instance_query](flecs::iter& it) {
-        flecs::world stage_world = it.world();
         const size_t current_enemy_count = static_cast<size_t>(
-            enemy_instance_query.iter(stage_world.c_ptr()).count());
-
-        const EnemyCount* singleton_component = stage_world.try_get<EnemyCount>();
+            enemy_instance_query.iter(it).count());
+        // https://discord.com/channels/633826290415435777/1455553733978099763/1455637997361041458
+        EnemyCount* singleton_component = it.world().try_get_mut<EnemyCount>();
         if (singleton_component == nullptr || singleton_component->value != current_enemy_count) {
-            stage_world.set<EnemyCount>({ current_enemy_count });
+            singleton_component->value = current_enemy_count;
+            it.world().modified<EnemyCount>();
         }
     });
 });

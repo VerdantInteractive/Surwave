@@ -53,13 +53,13 @@ struct EntityRenderers
 inline FlecsRegistry register_entity_rendering_components([](flecs::world& world) {
     world.component<EntityRenderers>().add(flecs::Singleton);
 
-    world.component<RenderingColor>("RenderingColor")
+    world.component<RenderingColor>()
         .member<float>("r")
         .member<float>("g")
         .member<float>("b")
         .member<float>("a");
 
-    world.component<RenderingCustomData>("RenderingCustomData")
+    world.component<RenderingCustomData>()
         .member<float>("r")
         .member<float>("g")
         .member<float>("b")

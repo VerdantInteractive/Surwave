@@ -38,8 +38,7 @@ inline FlecsRegistry register_player_take_damage_system([](flecs::world& world) 
         while (it.next()) {
             flecs::field<const Position2D> positions = it.field<const Position2D>(0);
             flecs::field<const MeleeDamage> melee_damages = it.field<const MeleeDamage>(1);
-            const std::size_t entity_count = it.count();
-            for (std::size_t entity_index = 0; entity_index < entity_count; ++entity_index) {
+            for (auto entity_index : it) { // https://discord.com/channels/633826290415435777/1455553733978099763/1455637997361041458
                 const godot::Vector2 enemy_position = positions[entity_index].value;
                 const godot::Vector2 delta = player_position_value - enemy_position;
                 const godot::real_t distance_squared = delta.length_squared();
@@ -54,7 +53,7 @@ inline FlecsRegistry register_player_take_damage_system([](flecs::world& world) 
                     continue;
                 }
 
-                flecs::entity damaging_enemy = it.entity(static_cast<std::int32_t>(entity_index));
+                flecs::entity damaging_enemy = it.entity(entity_index);
                 godot::Dictionary signal_data;
                 signal_data["damage_amount"] = damage_amount;
                 emit_godot_signal(it.world(), damaging_enemy, "enemy_hit_player", signal_data);

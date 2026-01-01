@@ -81,18 +81,18 @@ struct PhysicsSpace3D
 };
 
 inline FlecsRegistry register_physics_components([](flecs::world& world) {
-    world.component<Velocity2D>("Velocity2D")
+    world.component<Velocity2D>()
         .member<godot::Vector2>("value");
 
-    world.component<Velocity3D>("Velocity3D")
+    world.component<Velocity3D>()
         .member<godot::Vector3>("value");
 
-    world.component<PhysicsBodyShapes2D>("PhysicsBodyShapes2D");
-    world.component<PhysicsBodyInstance2D>("PhysicsBodyInstance2D");
-    world.component<PhysicsSpace2D>("PhysicsSpace2D").add(flecs::Singleton);
-    world.component<PhysicsBodyShapes3D>("PhysicsBodyShapes3D");
-    world.component<PhysicsBodyInstance3D>("PhysicsBodyInstance3D");
-    world.component<PhysicsSpace3D>("PhysicsSpace3D").add(flecs::Singleton);
+    world.component<PhysicsBodyShapes2D>();
+    world.component<PhysicsBodyInstance2D>();
+    world.component<PhysicsSpace2D>().add(flecs::Singleton);
+    world.component<PhysicsBodyShapes3D>();
+    world.component<PhysicsBodyInstance3D>();
+    world.component<PhysicsSpace3D>().add(flecs::Singleton);
 
     register_singleton_getter<PhysicsSpace2D>("PhysicsSpace2D");
     register_singleton_setter<godot::RID>("PhysicsSpace2D", [](flecs::world& world, const godot::RID& space_rid) {
