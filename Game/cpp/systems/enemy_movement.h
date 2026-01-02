@@ -70,17 +70,9 @@ namespace enemy_movement {
 } // namespace enemy_movement
 
 inline FlecsRegistry register_enemy_movement_system([](flecs::world& world) {
-    world.system<Position2D, Velocity2D, const MovementSpeed, const DeathTimer>("Enemy Movement")
+    world.system<Position2D, Velocity2D, const PlayerPosition, const EnemyBoidMovementSettings, const MovementSpeed, const DeathTimer>("Enemy Movement")
         .with(flecs::IsA, world.lookup("Enemy"))
         .run([](flecs::iter& it) {
-        flecs::world stage_world = it.world();
-        const PlayerPosition* player_position = stage_world.try_get<PlayerPosition>();
-        const EnemyBoidMovementSettings* movement_settings = stage_world.try_get<EnemyBoidMovementSettings>();
-
-        if (player_position == nullptr || movement_settings == nullptr) {
-            return;
-        }
-
         enemy_movement::KdTreeCache& kd_cache = enemy_movement::get_kd_tree_cache();
 
         std::vector<enemy_movement::BoidAccessor> boids;
@@ -89,6 +81,8 @@ inline FlecsRegistry register_enemy_movement_system([](flecs::world& world) {
 
         godot::real_t delta_time = 0.0f;
         bool delta_time_initialized = false;
+        const PlayerPosition* player_position = nullptr;
+        const EnemyBoidMovementSettings* movement_settings = nullptr;
 
         while (it.next()) {
             if (!delta_time_initialized) {
@@ -98,9 +92,13 @@ inline FlecsRegistry register_enemy_movement_system([](flecs::world& world) {
 
             flecs::field<Position2D> positions = it.field<Position2D>(0);
             flecs::field<Velocity2D> velocities = it.field<Velocity2D>(1);
-            flecs::field<const MovementSpeed> movement_speeds = it.field<const MovementSpeed>(2);
-            flecs::field<const DeathTimer> death_timers = it.field<const DeathTimer>(3);
+            flecs::field<const PlayerPosition> player_position_field = it.field<const PlayerPosition>(2); // singleton
+            flecs::field<const EnemyBoidMovementSettings> movement_settings_field = it.field<const EnemyBoidMovementSettings>(3); // singleton
+            flecs::field<const MovementSpeed> movement_speeds = it.field<const MovementSpeed>(4);
+            flecs::field<const DeathTimer> death_timers = it.field<const DeathTimer>(5);
 
+            player_position = &player_position_field[0];
+            movement_settings = &movement_settings_field[0];
             const godot::real_t max_speed_multiplier = movement_settings->max_speed_multiplier;
 
             for (size_t row_index = 0; row_index < it.count(); ++row_index) {
@@ -116,6 +114,10 @@ inline FlecsRegistry register_enemy_movement_system([](flecs::world& world) {
                 };
                 boids.push_back(accessor);
             }
+        }
+
+        if (player_position == nullptr || movement_settings == nullptr) {
+            return;
         }
 
         const size_t enemy_count = boids.size();

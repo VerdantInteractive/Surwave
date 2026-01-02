@@ -16,30 +16,27 @@
 #include "components/singletons.h"
 
 inline FlecsRegistry register_player_take_damage_system([](flecs::world& world) {
-    world.system<const Position2D, const MeleeDamage>("Enemy Hit Player")
+    world.system<PlayerDamageCooldown, const PlayerPosition, const PlayerTakeDamageSettings, const Position2D, const MeleeDamage>("Enemy Hit Player")
         .with(flecs::IsA, world.lookup("Enemy"))
         .run([](flecs::iter& it) {
-        const PlayerPosition* player_position = it.world().try_get<PlayerPosition>();
-        PlayerDamageCooldown* player_damage_cooldown = it.world().try_get_mut<PlayerDamageCooldown>();
-        const PlayerTakeDamageSettings* damage_settings = it.world().try_get<PlayerTakeDamageSettings>();
-        if (player_position == nullptr || player_damage_cooldown == nullptr || damage_settings == nullptr) {
-            return;
-        }
-
-        const godot::real_t cooldown = godot::Math::max(damage_settings->damage_cooldown, godot::real_t(0.0));
-        const bool can_take_damage = cooldown <= godot::real_t(0.0) || player_damage_cooldown->value >= cooldown;
-        if (!can_take_damage) {
-            return;
-        }
-
-        const godot::real_t player_hit_radius = godot::Math::max(damage_settings->player_hit_radius, godot::real_t(1.0));
-        const godot::Vector2 player_position_value = player_position->value;
-
         while (it.next()) {
-            flecs::field<const Position2D> positions = it.field<const Position2D>(0);
-            flecs::field<const MeleeDamage> melee_damages = it.field<const MeleeDamage>(1);
+            flecs::field<PlayerDamageCooldown> player_damage_cooldown = it.field<PlayerDamageCooldown>(0); // singleton
+            flecs::field<const PlayerPosition> player_position = it.field<const PlayerPosition>(1); // singleton
+            flecs::field<const PlayerTakeDamageSettings> damage_settings = it.field<const PlayerTakeDamageSettings>(2); // singleton
+            flecs::field<const Position2D> enemy_positions = it.field<const Position2D>(3);
+            flecs::field<const MeleeDamage> melee_damages = it.field<const MeleeDamage>(4);
+
+            const godot::real_t cooldown = godot::Math::max(damage_settings->damage_cooldown, godot::real_t(0.0));
+            const bool can_take_damage = cooldown <= godot::real_t(0.0) || player_damage_cooldown->value >= cooldown;
+            if (!can_take_damage) {
+                return;
+            }
+
+            const godot::real_t player_hit_radius = godot::Math::max(damage_settings->player_hit_radius, godot::real_t(1.0));
+            const godot::Vector2 player_position_value = player_position->value;
+
             for (auto entity_index : it) { // https://discord.com/channels/633826290415435777/1455553733978099763/1455637997361041458
-                const godot::Vector2 enemy_position = positions[entity_index].value;
+                const godot::Vector2 enemy_position = enemy_positions[entity_index].value;
                 const godot::Vector2 delta = player_position_value - enemy_position;
                 const godot::real_t distance_squared = delta.length_squared();
                 const godot::real_t contact_radius = player_hit_radius;

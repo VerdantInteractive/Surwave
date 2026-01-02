@@ -23,14 +23,13 @@ namespace
         typename InstanceT,
         typename BodyStateT>
     inline bool try_create_physics_body(
-        flecs::world world,
+        const SpaceT* physics_space,
         flecs::entity entity,
         const ShapesT& body_definition,
         const TransformT& transform,
         BodyStateT transform_state)
     {
         ServerT* physics_server = ServerT::get_singleton();
-        const SpaceT* physics_space = world.try_get<SpaceT>();
         if (!physics_server) { return false; }
         if (!physics_space) { return false; }
         if (!physics_space->space_rid.is_valid()) { return false; }
@@ -107,13 +106,11 @@ namespace
         const char* system_name,
         BodyStateT transform_state)
     {
-        world.system<const ShapesT>(system_name)
+        world.system<const SpaceT, const ShapesT, const TransformT*>(system_name)
             .kind(flecs::OnUpdate)
             .template without<InstanceT>()
-            .each([transform_state](flecs::iter& it, size_t index, const ShapesT& body_shapes)
+            .each([transform_state](flecs::entity entity, const SpaceT& space, const ShapesT& shapes, const TransformT* transform)
         {
-            flecs::entity entity = it.entity(index);
-            const TransformT* transform = entity.try_get<TransformT>();
             TransformT initial_transform = transform ? *transform : TransformT();
             try_create_physics_body<
                 ShapesT,
@@ -122,9 +119,9 @@ namespace
                 ServerT,
                 TransformT,
                 InstanceT>(
-                    it.world(),
+                    &space,
                     entity,
-                    body_shapes,
+                    shapes,
                     initial_transform,
                     transform_state);
         });
