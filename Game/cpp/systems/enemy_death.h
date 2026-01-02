@@ -40,7 +40,12 @@ inline FlecsRegistry register_enemy_death_system([](flecs::world& world) {
 
                 flecs::entity entity = it.entity(static_cast<std::int32_t>(entity_index));
                 godot::Dictionary signal_data;
-                const flecs::entity prefab_entity = entity.target(flecs::IsA);
+
+                const flecs::entity prefab_entity = entity.target(flecs::IsA); 
+                // https://discord.com/channels/633826290415435777/1455553733978099763/1455641967605059854
+                // https://discord.com/channels/633826290415435777/1455553733978099763/1456480409255936118
+                // const flecs::entity prefab_entity = it.pair(7).second();
+
                 signal_data["enemy_type"] = godot::String(prefab_entity.name().c_str());
                 signal_data["enemy_position"] = positions[entity_index].value;
                 emit_godot_signal(it.world(), entity, "enemy_died", signal_data);
