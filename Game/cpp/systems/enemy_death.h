@@ -38,10 +38,10 @@ inline FlecsRegistry register_enemy_death_system([](flecs::world& world) {
             for (auto entity_index : it) {
                 if (hit_points[entity_index].value > godot::real_t(0.0)) { continue; }
 
-                flecs::entity entity = it.entity(static_cast<std::int32_t>(entity_index));
+                flecs::entity entity = it.entity(entity_index);
                 godot::Dictionary signal_data;
 
-                const flecs::entity prefab_entity = entity.target(flecs::IsA); 
+                const flecs::entity prefab_entity = entity.target(flecs::IsA);
                 // https://discord.com/channels/633826290415435777/1455553733978099763/1455641967605059854
                 // https://discord.com/channels/633826290415435777/1455553733978099763/1456480409255936118
                 // const flecs::entity prefab_entity = it.pair(7).second();

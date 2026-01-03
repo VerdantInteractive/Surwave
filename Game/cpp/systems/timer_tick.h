@@ -50,7 +50,7 @@ inline FlecsRegistry register_enemy_timer_tick_system([](flecs::world& world) {
                     if (death_timer.value <= godot::real_t(0.0)) {
                         death_timer.value = godot::real_t(0.0);
 
-                        flecs::entity entity = it.entity(static_cast<std::int32_t>(entity_index));
+                        flecs::entity entity = it.entity(entity_index);
 
                         entity.destruct();
                         continue;
