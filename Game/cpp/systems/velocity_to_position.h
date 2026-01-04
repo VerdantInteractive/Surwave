@@ -1,7 +1,6 @@
 #pragma once
 
 #include "src/flecs_registry.h"
-
 #include "src/components/physics.h"
 #include "src/components/transform.h"
 

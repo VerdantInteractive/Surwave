@@ -15,7 +15,6 @@
 #include <godot_cpp/classes/multi_mesh_instance3d.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 
-#include <flecs.h>
 #include "src/world.h"
 #include "src/flecs_registry.h"
 #include "src/components/entity_rendering.h"

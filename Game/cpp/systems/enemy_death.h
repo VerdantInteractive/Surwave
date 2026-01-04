@@ -9,7 +9,6 @@
 #include <godot_cpp/variant/vector2.hpp>
 
 #include "src/flecs_registry.h"
-
 #include "src/components/physics.h"
 #include "src/components/transform.h"
 #include "src/utilities/godot_signal.h"

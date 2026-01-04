@@ -4,8 +4,8 @@
 #include <godot_cpp/variant/transform2d.hpp>
 #include <godot_cpp/variant/transform3d.hpp>
 
-#include "src/components/transform.h"
 #include "src/flecs_registry.h"
+#include "src/components/transform.h"
 
 inline FlecsRegistry register_transform_update_systems([](flecs::world& world)
 {

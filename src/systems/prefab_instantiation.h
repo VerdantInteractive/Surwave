@@ -7,13 +7,13 @@
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/variant/variant.hpp>
 
-#include "src/components/transform.h"
 #include "src/flecs_registry.h"
+#include "src/components/transform.h"
 
+using godot::Array;
 using godot::Dictionary;
 using godot::UtilityFunctions;
 using godot::Variant;
-using godot::Array;
 
 inline FlecsRegistry register_prefab_instantiation_system([](flecs::world& world)
 {

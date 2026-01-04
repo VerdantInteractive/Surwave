@@ -5,7 +5,6 @@
 #include <godot_cpp/core/math.hpp>
 
 #include "src/flecs_registry.h"
-
 #include "src/components/entity_rendering.h"
 #include "src/components/physics.h"
 
