@@ -1,5 +1,7 @@
 assets/
 
+.DS_Store
+
 # Binaries produced by the builds
 Game/cpp/bin/
 .sconsign.dblite

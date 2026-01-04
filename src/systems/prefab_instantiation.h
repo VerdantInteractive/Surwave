@@ -4,117 +4,16 @@
 
 #include <godot_cpp/variant/array.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
-#include <godot_cpp/classes/physics_server2d.hpp>
-#include <godot_cpp/classes/physics_server3d.hpp>
-#include <godot_cpp/variant/transform2d.hpp>
-#include <godot_cpp/variant/transform3d.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/variant/variant.hpp>
 
-#include "src/components/physics.h"
 #include "src/components/transform.h"
 #include "src/flecs_registry.h"
 
-using godot::Array;
 using godot::Dictionary;
 using godot::UtilityFunctions;
 using godot::Variant;
-
-namespace
-{
-    template<typename ShapesT, typename ShapeDefinitionT, typename SpaceT, typename ServerT, typename TransformT, typename InstanceT, typename BodyStateT>
-    inline bool create_physics_body(
-        flecs::entity& instance,
-        const ShapesT& body_definition,
-        const SpaceT* physics_space,
-        ServerT* physics_server,
-        const TransformT& transform,
-        BodyStateT transform_state)
-    {
-        if (!physics_server) { return false; }
-        if (!physics_space) { return false; }
-        if (!physics_space->space_rid.is_valid()) { return false; }
-        if (body_definition.shapes.empty()) { return false; }
-
-        godot::RID body_rid = physics_server->body_create();
-        physics_server->body_set_mode(body_rid, body_definition.body_mode);
-        physics_server->body_set_space(body_rid, physics_space->space_rid);
-        physics_server->body_set_collision_layer(body_rid, body_definition.collision_layer);
-        physics_server->body_set_collision_mask(body_rid, body_definition.collision_mask);
-
-        for (const ShapeDefinitionT& shape_def : body_definition.shapes)
-        {
-            physics_server->body_add_shape(body_rid, shape_def.shape->get_rid(), shape_def.local_transform);
-        }
-
-        physics_server->body_set_state(body_rid, transform_state, transform);
-        instance.set<InstanceT>({ body_rid });
-        return true;
-    }
-
-    template<
-        typename PhysicsServerT,
-        typename PhysicsSpaceT,
-        typename PhysicsBodyShapesT,
-        typename PhysicsBodyShapeDefinitionT,
-        typename TransformT,
-        typename PhysicsBodyInstanceT,
-        typename BodyStateT>
-    inline void process_physics_for_instance(
-        flecs::iter& it,
-        flecs::entity& instance,
-        bool& physics_ready,
-        bool& warned_missing_physics,
-        bool has_spawn_transform,
-        const TransformT& spawn_transform,
-        const godot::String& prefab_name)
-    {
-        PhysicsServerT* physics_server = PhysicsServerT::get_singleton();
-        const PhysicsSpaceT* physics_space = physics_server ? it.world().template try_get<PhysicsSpaceT>() : nullptr;
-        if (!physics_ready)
-        {
-            physics_ready = physics_server && physics_space && physics_space->space_rid.is_valid();
-        }
-
-        const PhysicsBodyShapesT* body_shapes = instance.template try_get<PhysicsBodyShapesT>();
-        if (body_shapes && !body_shapes->shapes.empty())
-        {
-            if (!physics_ready)
-            {
-                if (!warned_missing_physics)
-                {
-                    UtilityFunctions::push_warning(godot::String("Prefab Instantiation: ") + it.world().template component<PhysicsBodyShapesT>().name().c_str() + " present but physics space is unavailable.");
-                    warned_missing_physics = true;
-                }
-                return;
-            }
-
-            // Validate shapes before creating a body
-            for (const auto& shape_def : body_shapes->shapes)
-            {
-                if (shape_def.shape.is_null())
-                {
-                    UtilityFunctions::push_warning(godot::String("Prefab Instantiation: ") + it.world().template component<PhysicsBodyShapesT>().name().c_str() + " contains an invalid shape reference.");
-                    return; // Abort for this instance if any shape is invalid
-                }
-            }
-
-            const TransformT* transform_component = has_spawn_transform ? &spawn_transform : instance.template try_get<TransformT>();
-            TransformT final_transform = transform_component ? *transform_component : TransformT();
-
-            if (!create_physics_body<PhysicsBodyShapesT, PhysicsBodyShapeDefinitionT, PhysicsSpaceT, PhysicsServerT, TransformT, PhysicsBodyInstanceT, BodyStateT>(
-                instance,
-                *body_shapes,
-                physics_space,
-                physics_server,
-                final_transform,
-                static_cast<BodyStateT>(PhysicsServerT::BODY_STATE_TRANSFORM)))
-            {
-                UtilityFunctions::push_warning(godot::String("Prefab Instantiation: Failed to create physics body for prefab '") + prefab_name + "'.");
-            }
-        }
-    }
-}
+using godot::Array;
 
 inline FlecsRegistry register_prefab_instantiation_system([](flecs::world& world)
 {
@@ -126,8 +25,6 @@ inline FlecsRegistry register_prefab_instantiation_system([](flecs::world& world
         .write<Position3D>()
         .write<Rotation3D>()
         .write<Scale3D>()
-        .write<PhysicsBodyInstance2D>()
-        .write<PhysicsBodyInstance3D>()
         .run([&](flecs::iter& it)
     {
         const Dictionary* parameters = static_cast<const Dictionary*>(it.param());
@@ -217,23 +114,9 @@ inline FlecsRegistry register_prefab_instantiation_system([](flecs::world& world
             has_transforms = true;
         }
 
-        godot::PhysicsServer2D* physics_server_2d = godot::PhysicsServer2D::get_singleton();
-        const PhysicsSpace2D* physics_space_2d = physics_server_2d ? it.world().try_get<PhysicsSpace2D>() : nullptr;
-        bool physics_2d_ready = physics_server_2d && physics_space_2d && physics_space_2d->space_rid.is_valid();
-        bool warned_missing_physics_2d = false;
-
-        godot::PhysicsServer3D* physics_server_3d = godot::PhysicsServer3D::get_singleton();
-        const PhysicsSpace3D* physics_space_3d = physics_server_3d ? it.world().try_get<PhysicsSpace3D>() : nullptr;
-        bool physics_3d_ready = physics_server_3d && physics_space_3d && physics_space_3d->space_rid.is_valid();
-        bool warned_missing_physics_3d = false;
-
         for (int instance_idx = 0; instance_idx < count; ++instance_idx)
         {
             flecs::entity instance = world.entity().is_a(prefab);
-            bool has_spawn_transform_2d = false;
-            godot::Transform2D spawn_transform_2d;
-            bool has_spawn_transform_3d = false;
-            godot::Transform3D spawn_transform_3d;
             if (has_transforms) {
                 if (transforms_are_2d) {
                     godot::Transform2D transform = transforms_array[instance_idx];
@@ -244,9 +127,6 @@ inline FlecsRegistry register_prefab_instantiation_system([](flecs::world& world
                     instance.set<Position2D>({ position });
                     instance.set<Rotation2D>({ rotation });
                     instance.set<Scale2D>({ scale });
-                    instance.set<godot::Transform2D>(transform);
-                    spawn_transform_2d = transform;
-                    has_spawn_transform_2d = true;
                 }
                 else {
                     godot::Transform3D transform = transforms_array[instance_idx];
@@ -257,23 +137,8 @@ inline FlecsRegistry register_prefab_instantiation_system([](flecs::world& world
                     instance.set<Position3D>({ position });
                     instance.set<Rotation3D>({ rotation });
                     instance.set<Scale3D>({ scale });
-                    instance.set<godot::Transform3D>(transform);
-                    spawn_transform_3d = transform;
-                    has_spawn_transform_3d = true;
                 }
             }
-
-            // Process 2D physics
-            process_physics_for_instance<
-                godot::PhysicsServer2D, PhysicsSpace2D, PhysicsBodyShapes2D, PhysicsBodyShape2DDefinition,
-                godot::Transform2D, PhysicsBodyInstance2D, godot::PhysicsServer2D::BodyState>(
-                    it, instance, physics_2d_ready, warned_missing_physics_2d, has_spawn_transform_2d, spawn_transform_2d, prefab_name);
-
-            // Process 3D physics
-            process_physics_for_instance<
-                godot::PhysicsServer3D, PhysicsSpace3D, PhysicsBodyShapes3D, PhysicsBodyShape3DDefinition,
-                godot::Transform3D, PhysicsBodyInstance3D, godot::PhysicsServer3D::BodyState>(
-                    it, instance, physics_3d_ready, warned_missing_physics_3d, has_spawn_transform_3d, spawn_transform_3d, prefab_name);
         }
 
         // UtilityFunctions::print(godot::String("Prefab Instantiation: spawned ") + godot::String::num_int64(count) + " instances of '" + prefab_name + "'");
