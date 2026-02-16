@@ -29,6 +29,29 @@
             "args": [
                 "Game\\project.godot"
             ],
+        },
+        {
+            "name": "Game (Mac, lldb)",
+            "type": "lldb",
+            "request": "launch",
+            "preLaunchTask": "Build (Debug)",
+            "cwd": "${workspaceRoot}",
+            "program": "/Applications/Godot.app/Contents/MacOS/Godot",
+            "args": [
+                "--path",
+                "Game"
+            ],
+        },
+        {
+            "name": "Editor (Mac, lldb)",
+            "type": "lldb",
+            "request": "launch",
+            "preLaunchTask": "Build (Debug)",
+            "cwd": "${workspaceRoot}",
+            "program": "/Applications/Godot.app/Contents/MacOS/Godot",
+            "args": [
+                "Game/project.godot"
+            ],
         }
     ]
 }

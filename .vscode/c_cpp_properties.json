@@ -1,7 +1,7 @@
 {
     "configurations": [
         {
-            "name": "Win32",
+            "name": "Windows-x64",
             "includePath": [
                 "${workspaceFolder}/**"
             ],
@@ -12,8 +12,20 @@
             ],
             "windowsSdkVersion": "10.0.26100.0",
             "compilerPath": "cl.exe",
+            "intelliSenseMode": "windows-msvc-x64",
             "cStandard": "c17",
-            "intelliSenseMode": "windows-msvc-x64"
+            "cppStandard": "c++17"
+        },
+        {
+            "name": "Mac-x64",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/local/bin/g++-15",
+            "intelliSenseMode": "macos-gcc-x64",
+            "cStandard": "c17",
+            "cppStandard": "c++17"
         }
     ],
     "version": 4
