@@ -14,3 +14,7 @@ Game/cpp/bin/
 # IDE-generated files
 **/.idea/
 **/.vs/
+
+# Godot 4+ specific ignores
+.godot/
+/android/
