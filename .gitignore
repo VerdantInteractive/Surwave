@@ -3,7 +3,8 @@ assets/
 .DS_Store
 
 # Binaries produced by the builds
-Game/cpp/bin/
+.cache/
+cpp/bin/
 .sconsign.dblite
 **/*.dll
 **/*.obj
@@ -18,3 +19,42 @@ Game/cpp/bin/
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+### C++ build artifacts. The entries that follow are copied from the Stagehand .gitignore file into the one in the cpp/ subdirectory of the project.
+.cache/clangd
+bin/
+# Prerequisites
+*.d
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+*.os
+*.spv
+# Precompiled Headers
+*.gch
+*.pch
+# Linker files
+*.ilk
+# Debugger Files
+*.pdb
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+# Fortran module files
+*.mod
+*.smod
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+# Executables
+*.exe
+*.out
+*.app
+# debug information files
+*.dwo
+### End of C++ build artifacts section

@@ -190,7 +190,7 @@ func _spawn_initial_enemy_population() -> void:
 				var transform: Transform2D = _get_random_spawn_transform()
 				transforms.append(transform)
 
-			world.run_system("Prefab Instantiation", {
+			world.run_system("stagehand::Prefab Instantiation", {
 				"prefab": prefab,
 				"count": count,
 				"transforms": transforms,

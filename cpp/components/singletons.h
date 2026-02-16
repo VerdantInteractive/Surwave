@@ -2,9 +2,10 @@
 
 #include <godot_cpp/core/math_defs.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
+#include <godot_cpp/variant/variant.hpp>
 
-#include "src/flecs_registry.h"
-#include "src/flecs_singleton_registry.h"
+#include "stagehand/ecs/components/godot_variants.h"
+#include "stagehand/registry.h"
 
 struct EnemyBoidMovementSettings {
     godot::real_t player_attraction_weight;
@@ -45,26 +46,18 @@ struct PlayerTakeDamageSettings {
     godot::real_t player_hit_radius;
 };
 
-struct ProjectileData {
-    godot::Dictionary value;
-};
+GODOT_VARIANT(ProjectileData, Dictionary);
+GODOT_VARIANT(ShockwaveData, Dictionary);
 
-struct ShockwaveData {
-    godot::Dictionary value;
-};
-
-struct EnemyCount
-{
+struct EnemyCount {
     size_t value;
 
     // Allows implicit conversion of this struct to a godot::Variant.
-    operator godot::Variant() const {
-        return static_cast<int64_t>(value);
-    }
+    operator godot::Variant() const { return static_cast<int64_t>(value); }
+    operator int64_t() const { return static_cast<int64_t>(value); }
 };
 
-
-inline FlecsRegistry register_game_singleton_components([](flecs::world& world) {
+inline stagehand::Registry register_game_singleton_components([](flecs::world &world) {
     world.component<EnemyBoidMovementSettings>()
         .member<godot::real_t>("player_attraction_weight")
         .member<godot::real_t>("player_engage_distance")
@@ -92,7 +85,7 @@ inline FlecsRegistry register_game_singleton_components([](flecs::world& world) 
             godot::real_t(8.0),   // kd_tree_max_stale_frames
             godot::real_t(48.0),  // max_neighbor_sample_count
             godot::real_t(0.05)   // separation_noise_intensity
-            });
+        });
 
     world.component<EnemyAnimationSettings>()
         .member<godot::real_t>("animation_interval")
@@ -114,8 +107,8 @@ inline FlecsRegistry register_game_singleton_components([](flecs::world& world) 
             godot::real_t(0.5),  // vertical_flip_cooldown
             godot::real_t(9.0),  // nominal_movement_speed
             godot::real_t(0.3),  // animation_offset_fraction_range
-            godot::real_t(0.1) // hit_reaction_duration
-            });
+            godot::real_t(0.1)   // hit_reaction_duration
+        });
 
     world.component<EnemyTakeDamageSettings>()
         .member<godot::real_t>("projectile_hit_cooldown")
@@ -128,34 +121,40 @@ inline FlecsRegistry register_game_singleton_components([](flecs::world& world) 
             godot::real_t(1.0), // shockwave_hit_cooldown
             godot::real_t(1.0), // projectile_damage
             godot::real_t(1.0)  // shockwave_damage
-            });
+        });
 
     world.component<PlayerTakeDamageSettings>()
         .member<godot::real_t>("damage_cooldown")
         .member<godot::real_t>("player_hit_radius")
         .add(flecs::Singleton)
-        .set<PlayerTakeDamageSettings>({ godot::real_t(0.3), godot::real_t(9.0) });
+        .set<PlayerTakeDamageSettings>({godot::real_t(0.3), godot::real_t(9.0)});
 
-    world.component<EnemyCount>()
-        .member<size_t>("value")
-        .add(flecs::Singleton)
-        .set<EnemyCount>({ 0 });
+    world.component<EnemyCount>().member<size_t>("value").add(flecs::Singleton).set<EnemyCount>({0});
 
-    world.component<ProjectileData>()
-        .add(flecs::Singleton);
+    world.component<ProjectileData>().add(flecs::Singleton);
+    stagehand::register_component_getter<ProjectileData, godot::Dictionary>("ProjectileData");
+    stagehand::register_component_setter<ProjectileData, godot::Dictionary>("ProjectileData");
 
-    world.component<ShockwaveData>()
-        .add(flecs::Singleton);
+    world.component<ShockwaveData>().add(flecs::Singleton);
+    stagehand::register_component_getter<ShockwaveData, godot::Dictionary>("ShockwaveData");
+    stagehand::register_component_setter<ShockwaveData, godot::Dictionary>("ShockwaveData");
 
-    register_singleton_setter<godot::Dictionary>("EnemyTakeDamageSettings", [](flecs::world& world, const godot::Dictionary& damage_settings) {
-        const EnemyTakeDamageSettings* existing_settings = world.try_get<EnemyTakeDamageSettings>();
+    stagehand::get_component_setters()["EnemyTakeDamageSettings"] = [](flecs::world &world, flecs::entity_t entity_id, const godot::Variant &value) {
+        if (entity_id != 0 || !godot::Variant::can_convert(value.get_type(), godot::Variant::DICTIONARY)) {
+            return;
+        }
+
+        const godot::Dictionary damage_settings = static_cast<godot::Dictionary>(value);
+        const EnemyTakeDamageSettings *existing_settings = world.try_get<EnemyTakeDamageSettings>();
         EnemyTakeDamageSettings updated_settings = existing_settings ? *existing_settings : EnemyTakeDamageSettings{};
 
         if (damage_settings.has("projectile_hit_cooldown")) {
-            updated_settings.projectile_hit_cooldown = static_cast<godot::real_t>(damage_settings.get("projectile_hit_cooldown", updated_settings.projectile_hit_cooldown));
+            updated_settings.projectile_hit_cooldown =
+                static_cast<godot::real_t>(damage_settings.get("projectile_hit_cooldown", updated_settings.projectile_hit_cooldown));
         }
         if (damage_settings.has("shockwave_hit_cooldown")) {
-            updated_settings.shockwave_hit_cooldown = static_cast<godot::real_t>(damage_settings.get("shockwave_hit_cooldown", updated_settings.shockwave_hit_cooldown));
+            updated_settings.shockwave_hit_cooldown =
+                static_cast<godot::real_t>(damage_settings.get("shockwave_hit_cooldown", updated_settings.shockwave_hit_cooldown));
         }
         if (damage_settings.has("projectile_damage")) {
             updated_settings.projectile_damage = static_cast<godot::real_t>(damage_settings.get("projectile_damage", updated_settings.projectile_damage));
@@ -165,15 +164,7 @@ inline FlecsRegistry register_game_singleton_components([](flecs::world& world) 
         }
 
         world.set<EnemyTakeDamageSettings>(updated_settings);
-    });
+    };
 
-    register_singleton_getter<EnemyCount>("EnemyCount");
-
-    register_singleton_setter<godot::Dictionary>("ProjectileData", [](flecs::world& world, const godot::Dictionary& projectile_data) {
-        world.set<ProjectileData>({ projectile_data });
-    });
-
-    register_singleton_setter<godot::Dictionary>("ShockwaveData", [](flecs::world& world, const godot::Dictionary& shockwave_data) {
-        world.set<ShockwaveData>({ shockwave_data });
-    });
+    stagehand::register_component_getter<EnemyCount, int64_t>("EnemyCount");
 });
