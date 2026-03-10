@@ -1,5 +1,7 @@
 # Surwave
 
+**Note**: This repository represents an early version Surwave, and the code and patterns have been improved significantly in [Stagehand, an ECS framework for the Godot engine](https://github.com/VerdantInteractive/Stagehand), where Surwave is [included as a demo](https://github.com/VerdantInteractive/Stagehand/tree/main/demos/Surwave). You should use to that version as a reference instead of code in this repository.
+
 **A game made for the [Game Off 2025 jam](https://itch.io/jam/game-off-2025).**
 
 👉 [**PLAY OR DOWNLOAD ON itch.io**](https://60k41p.itch.io/surwave) 👈
